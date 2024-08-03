@@ -17,7 +17,7 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: php-fpm
+  IMAGE_NAME: go-whatsapp-multidevice-rest
 
 jobs:
   Build-and-Push:
