@@ -29,5 +29,5 @@ RUN chmod +x ./entrypoint.sh
 EXPOSE 3000
 VOLUME ["/usr/app/dbs"]
 
-ENTRYPOINT ["./entrypoint.sh"]
+CMD ["./main"]
 
