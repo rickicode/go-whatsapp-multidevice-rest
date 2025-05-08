@@ -13,15 +13,13 @@ RUN go mod download && \
     CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags="-s -w" -a -o main cmd/main/main.go
 
 
-# Final Image (gunakan base image yang ARM64-ready)
+# Final Image (ARM64-ready, Alpine + glibc)
 # ---------------------------------------------------
 FROM alpine:latest
 
-ARG SERVICE_NAME="go-whatsapp-multidevice-rest"
+ENV PATH=$PATH:/usr/app
 
-ENV PATH=$PATH:/usr/app/${SERVICE_NAME}
-
-WORKDIR /usr/app/${SERVICE_NAME}
+WORKDIR /usr/app
 
 RUN apk add --no-cache libc6-compat && \
     mkdir -p {.bin/webp,dbs} && \
@@ -32,5 +30,6 @@ COPY --from=go-builder /usr/src/app/main ./main
 
 EXPOSE 3000
 
-VOLUME ["/usr/app/${SERVICE_NAME}/dbs"]
+VOLUME ["/usr/app/dbs"]
+
 CMD ["./main"]
