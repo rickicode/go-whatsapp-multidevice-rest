@@ -1,24 +1,20 @@
 #!/bin/bash
 
-echo "Generating .env from environment variables..."
+echo "Generating .env from all environment variables..."
 
-# Atur prefix yang akan dimasukkan
-PREFIXES=("SERVER_" "HTTP_" "AUTH_" "WHATSAPP_" "LIBWEBP_")
-
-# Buat file .env baru
+# Buat file baru
 echo "# Auto-generated .env file" > .env
 
-# Loop semua env var yang ada
-env | while IFS='=' read -r key value; do
-  for prefix in "${PREFIXES[@]}"; do
-    if [[ "$key" == "$prefix"* ]]; then
-      echo "$key=$value" >> .env
-      break
-    fi
-  done
+# Ambil semua environment variable yang aktif di container
+printenv | while IFS='=' read -r key value; do
+  # Hindari variable internal dari shell & Docker
+  if [[ "$key" != "_" && "$key" != "PWD" && "$key" != "HOME" && "$key" != "PATH" && "$key" != "SHLVL" ]]; then
+    echo "$key=$value" >> .env
+  fi
 done
 
-echo "Generated .env:"
+echo ".env file created with contents:"
 cat .env
-echo "Starting app..."
+
+# Jalankan aplikasi
 exec ./main
