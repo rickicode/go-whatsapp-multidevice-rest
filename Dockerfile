@@ -23,8 +23,11 @@ RUN apk add curl nano bash && mkdir -p .bin/webp dbs && \
 
 COPY --from=builder /app/main ./main
 COPY --from=builder /app/.env.example .env
+COPY entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 
 EXPOSE 3000
 VOLUME ["/usr/app/dbs"]
 
-CMD ["./main"]
+ENTRYPOINT ["./entrypoint.sh"]
+
