@@ -13,17 +13,14 @@ COPY . ./
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags="-s -w" -o main ./cmd/main/main.go
 
 
-# Final Image
-FROM alpine:latest
+# Final Image (glibc-ready Alpine)
+FROM frolvlad/alpine-glibc:latest
 
 WORKDIR /usr/app
 
-# Install minimal glibc compatibility if needed
-RUN apk add --no-cache libc6-compat && \
-    mkdir -p .bin/webp dbs && \
+RUN mkdir -p .bin/webp dbs && \
     chmod 775 .bin/webp dbs
 
-# Copy only necessary files
 COPY --from=builder /app/main ./main
 COPY --from=builder /app/.env.example .env
 
