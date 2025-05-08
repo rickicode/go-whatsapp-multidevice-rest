@@ -18,7 +18,7 @@ FROM frolvlad/alpine-glibc:latest
 
 WORKDIR /usr/app
 
-RUN mkdir -p .bin/webp dbs && \
+RUN apk add curl nano bash && mkdir -p .bin/webp dbs && \
     chmod 775 .bin/webp dbs
 
 COPY --from=builder /app/main ./main
