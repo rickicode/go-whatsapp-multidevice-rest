@@ -1,35 +1,33 @@
-# Builder Image (multi-arch aware)
-# ---------------------------------------------------
-FROM --platform=$BUILDPLATFORM golang:1.22-alpine AS go-builder
+# Builder Image
+FROM --platform=$BUILDPLATFORM golang:1.22-alpine AS builder
 
 ARG TARGETOS
 ARG TARGETARCH
 
-WORKDIR /usr/src/app
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
 
 COPY . ./
-
-RUN go mod download && \
-    CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags="-s -w" -a -o main cmd/main/main.go
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags="-s -w" -o main ./cmd/main/main.go
 
 
-# Final Image (ARM64-ready, Alpine + glibc)
-# ---------------------------------------------------
+# Final Image
 FROM alpine:latest
-
-ENV PATH=$PATH:/usr/app
 
 WORKDIR /usr/app
 
+# Install minimal glibc compatibility if needed
 RUN apk add --no-cache libc6-compat && \
-    mkdir -p {.bin/webp,dbs} && \
-    chmod 775 {.bin/webp,dbs}
+    mkdir -p .bin/webp dbs && \
+    chmod 775 .bin/webp dbs
 
-COPY --from=go-builder /usr/src/app/.env.example ./.env
-COPY --from=go-builder /usr/src/app/main ./main
+# Copy only necessary files
+COPY --from=builder /app/main ./main
+COPY --from=builder /app/.env.example .env
 
 EXPOSE 3000
-
 VOLUME ["/usr/app/dbs"]
 
 CMD ["./main"]
